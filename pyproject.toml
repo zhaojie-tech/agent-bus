@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ab-bus"
+name = "local-agent-bus"
 version = "0.1.0"
 description = "Local-first message bus that lets multiple interactive AI coding agents on one machine discover each other, talk in rooms, and run a human-in-the-loop-by-default task flow — pure stdlib, zero runtime dependencies."
 readme = { file = "README.md", content-type = "text/markdown" }

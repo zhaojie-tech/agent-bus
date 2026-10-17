@@ -82,7 +82,7 @@ jobs:
           agentbus --as human whoami
       - name: Smoke — two-agent demo against installed package
         run: |
-          AGENTBUS_BIN="$(pipx environment --value PIPX_LOCAL_VENVS)/ab-bus/bin/agentbus" \
+          AGENTBUS_BIN="$(pipx environment --value PIPX_LOCAL_VENVS)/local-agent-bus/bin/agentbus" \
             bash examples/two-agent-demo.sh
 
   windows-best-effort:

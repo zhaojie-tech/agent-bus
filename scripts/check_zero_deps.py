@@ -25,7 +25,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 PKG = "agentbus"  # import name
-DIST = "ab-bus"  # distribution name (pip/wheel)
+DIST = "local-agent-bus"  # distribution name (pip/wheel)
 TOOLCHAIN = {"pip", "setuptools", "wheel"}
 
 
