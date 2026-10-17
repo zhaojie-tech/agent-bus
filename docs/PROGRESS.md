@@ -45,7 +45,9 @@
 
 1. 确定 GitHub 账号 / 组织名后，回填 pyproject `[project.urls]`、
    README 徽章与 mkdocs `repo_url`（当前为占位）。
-2. PyPI 侧为 `agent-bus` 创建 trusted publishing 的 pending publisher
+2. PyPI 侧为 `ab-bus` 创建 trusted publishing 的 pending publisher
+   （发行名：`agent-bus` 与已存在的 `agentbus` 触发 PyPI 相似度门，
+   改用后备名 `ab-bus`；仓库名不变）
    （首版上传前完成）。
 3. 发布提交者身份定名（当前为仓库默认占位）。
 4. 首次发布前重跑全部门禁与打包冒烟。

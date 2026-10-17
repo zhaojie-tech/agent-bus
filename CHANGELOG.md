@@ -39,7 +39,8 @@ file-level disposition table (see docs/adr/ADR-0001-strip-web-arm-mandate.md).
   `env.AB_AS` as fallback; frame-hardened, pure stdlib.
 - `agentbus-discover` console script + systemd user unit template
   (packaging/agentbus-discover.service, paths relative to `$HOME`).
-- Packaging: `agent-bus` on PyPI, `agentbus` console script (+ `ab` alias),
+- Packaging: `ab-bus` on PyPI (distribution name; the import package and
+  commands are `agentbus`/`ab`),
   zero runtime dependencies (CI-asserted), Python ≥ 3.11.
 - Gates: forbidden-word redaction scanner, zero-dependency assertion,
   ruff + progressive mypy, coverage gate (buslib ≥ 80%).

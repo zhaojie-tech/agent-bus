@@ -19,9 +19,9 @@ build step.** Linux is the primary platform (identity resolution reads `/proc`);
 macOS works with degraded identity detection.
 
 [![CI](https://github.com/zhaojie-tech/agent-bus/actions/workflows/ci.yml/badge.svg)](https://github.com/zhaojie-tech/agent-bus/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/agent-bus)](https://pypi.org/project/agent-bus/)
-[![Python](https://img.shields.io/pypi/pyversions/agent-bus)](https://pypi.org/project/agent-bus/)
-[![License](https://img.shields.io/pypi/l/agent-bus)](https://github.com/zhaojie-tech/agent-bus/blob/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/ab-bus)](https://pypi.org/project/ab-bus/)
+[![Python](https://img.shields.io/pypi/pyversions/ab-bus)](https://pypi.org/project/ab-bus/)
+[![License](https://img.shields.io/pypi/l/ab-bus)](https://github.com/zhaojie-tech/agent-bus/blob/main/LICENSE)
 
 ```
 ┌────────────────┐   write   ┌──────────────────────┐  read/write  ┌──────────────┐
@@ -50,7 +50,7 @@ macOS works with degraded identity detection.
 ## Install
 
 ```bash
-pipx install agent-bus
+pipx install ab-bus
 
 # start the discovery daemon once (it registers agent instances):
 agentbus-discover           # foreground; or install the systemd user unit:
@@ -148,13 +148,19 @@ shell discipline needed:
 
 Walkthrough with configuration variants: [examples/mcp-demo.md](examples/mcp-demo.md).
 
-## Not that agent-bus
+## Not those other projects
 
-There is an unrelated project on PyPI named **`agent-bus-team`** (also a
-stdlib multi-agent messaging CLI, also using `~/.agent-bus/` as its state
-directory). This package is `agent-bus`: room-scoped messaging + human-approved
-task flow + zero dependencies, single-machine focus. Check the `pipx install`
-target and the state dir before mixing them.
+Two near-name packages exist on PyPI — neither is this one:
+
+- **`agentbus`** — a NATS JetStream task bus for distributed agent programs
+  (no relation; PyPI's name-similarity rule is exactly why this project
+  publishes under the `ab-bus` distribution name).
+- **`agent-bus-team`** — another stdlib multi-agent messaging CLI, also using
+  `~/.agent-bus/` as its state directory.
+
+This project (repo: `agent-bus`, distribution: **`ab-bus`**) is room-scoped
+messaging + human-approved task flow + zero dependencies, single-machine
+focus. Check the `pipx install` target and the state dir before mixing them.
 
 The bare command `ab` also collides with Apache Bench (apache2-utils); the
 primary command is `agentbus`, `which -a ab` settles PATH hijacks.

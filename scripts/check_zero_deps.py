@@ -24,7 +24,8 @@ import venv
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-PKG = "agentbus"
+PKG = "agentbus"  # import name
+DIST = "ab-bus"  # distribution name (pip/wheel)
 TOOLCHAIN = {"pip", "setuptools", "wheel"}
 
 
@@ -111,7 +112,8 @@ def main() -> int:
             def norm(s: str) -> str:
                 return s.replace("-", "").replace("_", "")
 
-            third_party = {n for n in names if norm(n) not in {norm(PKG)} and n not in TOOLCHAIN}
+            allowed = {norm(PKG), norm(DIST)}
+            third_party = {n for n in names if norm(n) not in allowed and n not in TOOLCHAIN}
         else:
             names = {p.name.lower() for p in site.iterdir()}
             # target 目录里合法的只有：本包目录、*.dist-info 元数据、
@@ -121,7 +123,10 @@ def main() -> int:
                 for n in names
                 if n != PKG
                 and n != "bin"
-                and not n.replace("-", "").replace("_", "").startswith(PKG)
+                and not (
+                    n.replace("-", "").replace("_", "").startswith(PKG)
+                    or n.replace("-", "").replace("_", "").startswith(DIST.replace("-", ""))
+                )
             }
         if third_party:
             print(f"FAIL: third-party packages installed: {sorted(third_party)}")
