@@ -9,6 +9,7 @@ import os
 import pathlib
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from agentbus import buslib
 from agentbus.buslib import (
@@ -130,6 +131,11 @@ class DoctorChecksTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
+        # 隔离：run_checks 的 db 存在性判定走 AB_DB/默认路径——不设的话
+        # 测试结果取决于开发机是否恰有 ~/.agent-bus/bus.db（CI 无）
+        self._env = patch.dict(os.environ, {"AB_DB": os.path.join(self.tmp.name, "bus.db")})
+        self._env.start()
+        self.addCleanup(self._env.stop)
 
     def _proc_root_with_daemon(self):
         root = pathlib.Path(self.tmp.name) / "proc"
