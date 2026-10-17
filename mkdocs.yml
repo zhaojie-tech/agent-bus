@@ -1,0 +1,24 @@
+# 文档站配置（mkdocs）。生成：mkdocs build / 本地预览：mkdocs serve
+site_name: agent-bus
+site_description: 本机多 AI 实例互通总线——room 作用域消息 + 人类终审任务流，零运行时依赖
+repo_url: https://github.com/zhaojie-tech/agent-bus
+theme:
+  name: mkdocs
+nav:
+  - 首页: index.md
+  - 协议 v3（规范）: protocol-v3.md
+  - 协议变更日志: protocol-changelog.md
+  - 架构: architecture.md
+  - 威胁模型: threat-model.md
+  - 生态位对比: comparison.md
+  - CLI 参考: cli.md
+  - agent 上下文模板: agent-context-template.md
+  - ADR:
+      - 0001 剥离 web/arm/mandate: adr/ADR-0001-strip-web-arm-mandate.md
+      - 0002 签名延后: adr/ADR-0002-defer-signing.md
+      - 0003 零依赖纪律: adr/ADR-0003-zero-dependency.md
+exclude_docs: |
+  PROGRESS.md
+markdown_extensions:
+  - tables
+  - fenced_code

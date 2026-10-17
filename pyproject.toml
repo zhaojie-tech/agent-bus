@@ -1,0 +1,111 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-bus"
+version = "0.1.0"
+description = "Local-first message bus that lets multiple interactive AI coding agents on one machine discover each other, talk in rooms, and run a human-in-the-loop-by-default task flow — pure stdlib, zero runtime dependencies."
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "agent-bus maintainers" }]
+keywords = ["ai", "agents", "message-bus", "cli", "sqlite", "multi-agent", "local-first"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Natural Language :: Chinese (Simplified)",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Communications",
+  "Topic :: Software Development",
+]
+# 零运行时依赖是产品特性：任何依赖都只能进 [project.optional-dependencies].dev。
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "pyyaml",
+  "ruff",
+    # 注意：本仓 mypy 1.14 实测 overrides 内 strict=true 会泄漏为全局
+  # （strict 子旗标在解析期展开进全局选项），严格 lane 一律显式展开子旗标
+  "mypy==1.14.*",
+]
+
+[project.urls]
+Homepage = "https://github.com/zhaojie-tech/agent-bus"
+Repository = "https://github.com/zhaojie-tech/agent-bus"
+Changelog = "https://github.com/zhaojie-tech/agent-bus/blob/main/CHANGELOG.md"
+"Protocol spec" = "https://github.com/zhaojie-tech/agent-bus/blob/main/docs/protocol-v3.md"
+
+[project.scripts]
+agentbus = "agentbus.cli:run"
+ab = "agentbus.cli:run"
+agentbus-discover = "agentbus.discover:main"
+agentbus-mcp = "agentbus.mcp:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentbus"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "docs", "examples", "scripts", "packaging", ".github", "README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md", "CHANGELOG.md", "mkdocs.yml", "pyproject.toml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+# 渐进门 v0.1 规则集：pyflakes/pycodestyle 全量 + import 排序 + pyupgrade +
+# bugbear。C4/RUF/SIM/PLW/FURB 等扩展族随 v0.2 全量英文化批次渐进接入。
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = [
+  "E501",   # 行宽由 ruff format 统一裁决
+]
+
+[tool.ruff.lint.per-file-ignores]
+# tests 中的断言消息长、夹具命名带中文下划线，维持现状
+"tests/*" = ["B011"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/agentbus"]
+no_implicit_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+# mypy 2.x 起默认全 strict。渐进门（先公共 API 面）显式钉死基线：
+# 注解完备性类检查关（补注随批次渐进），数据流真实性检查开。
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_any_generics = false
+check_untyped_defs = true
+warn_return_any = false
+
+# 严格 lane：notifier（全类型）先行，v0.2 逐模块收敛。
+# 不用 strict=true（会泄漏全局，见 dev 依赖注释），显式展开其子旗标。
+[[tool.mypy.overrides]]
+module = "agentbus.notifier"
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+warn_return_any = true
+strict_equality = true
+
+[tool.coverage.run]
+source = ["agentbus"]

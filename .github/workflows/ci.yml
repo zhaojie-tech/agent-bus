@@ -1,0 +1,102 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.11", "3.12", "3.13", "3.14"]
+        include:
+          # macOS 腿：/proc 相关用例预期大量 skipif，标非阻塞，仅验证纯逻辑套件
+          - os: macos-latest
+            python: "3.12"
+            experimental: true
+          # Python 3.15 已发布——实验跟进腿
+          - os: ubuntu-latest
+            python: "3.15"
+            experimental: true
+    continue-on-error: ${{ matrix.experimental || false }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # redaction gate also scans commit messages
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install (editable + dev)
+        run: python -m pip install -e ".[dev]"
+      - name: Lint (ruff check + format)
+        run: |
+          ruff check src/ tests/ scripts/
+          ruff format --check src/ tests/ scripts/
+      - name: Type gate (progressive mypy)
+        run: mypy
+      - name: Fast lane (all suites incl. protocol conformance)
+        run: pytest tests/ -q --ignore=tests/test_discover.py
+      - name: Slow lane (discover /proc scanning; Linux-only semantics)
+        if: runner.os == 'Linux'
+        run: pytest tests/test_discover.py -q
+      - name: Coverage gate (buslib >= 80%)
+        if: matrix.python == '3.11' && runner.os == 'Linux'
+        run: |
+          pytest tests/ -q --cov=agentbus.buslib --cov-report=term --cov-fail-under=80
+      - name: Redaction gate (forbidden words, incl. commit messages)
+        run: python scripts/check_forbidden_words.py --git-history
+      - name: Generated CLI reference is in sync
+        run: python scripts/gen_cli_docs.py --check
+      - name: Workflow files structurally valid
+        run: python scripts/check_workflows.py
+
+  packaging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Zero-dependency assertion (wheel → clean env → AST)
+        run: python scripts/check_zero_deps.py
+      - name: Install pipx
+        run: python -m pip install pipx
+      - name: Smoke — pipx install from local path
+        run: |
+          pipx install .
+          agentbus version
+          ab version
+          agentbus --as human whoami
+      - name: Smoke — two-agent demo against installed package
+        run: |
+          AGENTBUS_BIN="$(pipx environment --value PIPX_LOCAL_VENVS)/agent-bus/bin/agentbus" \
+            bash examples/two-agent-demo.sh
+
+  windows-best-effort:
+    # Windows is best-effort: identity resolution (/proc) is Linux-only;
+    # 本腿只验证纯逻辑套件（discover 的 /proc/symlink fixture 为 POSIX 语义），
+    # 失败不阻塞合并，问题按「文档声明范围」处理。
+    continue-on-error: true
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install (editable + dev)
+        run: python -m pip install -e ".[dev]"
+      - name: Fast lane only (discover excluded)
+        run: pytest tests/ -q --ignore=tests/test_discover.py

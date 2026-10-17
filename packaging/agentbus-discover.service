@@ -1,0 +1,11 @@
+[Unit]
+Description=agent-bus discovery daemon (agentbus-discover)
+After=network.target
+
+[Service]
+ExecStart=%h/.local/bin/agentbus-discover
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
