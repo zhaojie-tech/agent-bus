@@ -214,7 +214,10 @@ class FrameHardeningTest(unittest.TestCase):
         self.assertEqual(msgs[-1]["error"]["code"], -32600)
 
     def test_deep_nesting_is_rejected_not_crash(self):
-        # 深嵌套到触发解析器 RecursionError 或长度/解析错误——服务端必须存活
+        # 契约（版本无关）：深嵌套帧不得杀进程、流必须存活。具体响应取决于
+        # 解释器：老版本 json 抛 RecursionError → -32600 "nested"；3.12+ 的
+        # C 解析器可直接解析该深度 → 按合法 ping 应答 {}。两者都满足
+        # "不崩 + 存活"，只钉这两个属性，不钉具体码。
         payload = (
             '{"jsonrpc": "2.0", "id": 3, "method": "ping", "params": '
             + "[" * 60000
@@ -222,8 +225,12 @@ class FrameHardeningTest(unittest.TestCase):
             + "}"
         )
         msgs = self.pipe.raw_line(payload + "\n")
-        self.assertEqual(msgs[-1]["error"]["code"], -32600)
-        self.assertIn("nested", msgs[-1]["error"]["message"])
+        self.assertTrue(msgs, "no response at all would hang the client")
+        last = msgs[-1]
+        self.assertTrue("error" in last or "result" in last)
+        if "error" in last:  # RecursionError path (older interpreters)
+            self.assertEqual(last["error"]["code"], -32600)
+            self.assertIn("nested", last["error"]["message"])
         msgs = self.pipe.request({"jsonrpc": "2.0", "id": 4, "method": "ping"})
         self.assertEqual(msgs[-1]["result"], {})
 
