@@ -54,8 +54,9 @@ jobs:
           path: dist/
 
   publish:
-    # PyPI trusted publishing：须在 PyPI 预先创建 pending publisher
-    # （project: agent-bus, owner/repo/workflow 与本文件一致）后首版方可上传
+    # PyPI trusted publishing: create the pending publisher on PyPI before the
+    # first release — project 'local-agent-bus', owner/repo
+    # zhaojie-tech/agent-bus, workflow release.yml, environment pypi
     runs-on: ubuntu-latest
     needs: build
     environment: pypi
